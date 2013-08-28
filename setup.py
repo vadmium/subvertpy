@@ -318,7 +318,7 @@ class install_lib_with_dlls(install_lib):
 
     def get_outputs(self):
         ret = install_lib.get_outputs(self)
-        ret.extend([info[1] for info in self._get_dlls()])
+        ret.extend(info[1] for info in self._get_dlls())
         return ret
 
 cmdclass = {}
