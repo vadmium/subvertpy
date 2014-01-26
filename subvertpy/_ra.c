@@ -622,6 +622,7 @@ static PyObject *ra_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 	ret->client_string_func = client_string_func;
 	ret->open_tmp_file_func = open_tmp_file_func;
 	Py_INCREF(client_string_func);
+	Py_INCREF(open_tmp_file_func);
 	callbacks2->progress_func = py_progress_func;
 	callbacks2->auth_baton = auth_baton;
 	callbacks2->open_tmp_file = py_open_tmp_file;
@@ -1994,6 +1995,7 @@ static void ra_dealloc(PyObject *self)
 {
 	RemoteAccessObject *ra = (RemoteAccessObject *)self;
 	Py_XDECREF(ra->client_string_func);
+	Py_XDECREF(ra->open_tmp_file_func);
 	Py_XDECREF(ra->progress_func);
 	Py_XDECREF(ra->auth);
 	apr_pool_destroy(ra->pool);
