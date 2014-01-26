@@ -112,8 +112,12 @@ static svn_error_t *py_lock_func (void *baton, const char *path, int do_lock,
 
 static const char ra_doc[] =
 	"RemoteAccess(url, progress_cb=None, auth=None, config=None, "
-	"client_string_func=None, open_tmp_file_func=None, uuid=None)\n\n"
-	"Connection to a remote Subversion repository.\n";
+	"client_string_func=None, open_tmp_file_func=None, uuid=None, "
+	"cancel_func=None)\n\n"
+	"Connection to a remote Subversion repository.\n\n"
+	":param cancel_func: An operation may be cancelled by arranging for this\n"
+	"    callback to raise an exception, which will be thrown back to the\n"
+	"    calling code.\n";
 typedef struct {
 	PyObject_HEAD
 	svn_ra_session_t *ra;
@@ -124,6 +128,7 @@ typedef struct {
 	bool busy;
 	PyObject *client_string_func;
 	PyObject *open_tmp_file_func;
+	PyObject *cancel_func;
 	char *root;
 } RemoteAccessObject;
 
@@ -550,6 +555,18 @@ static svn_error_t *py_open_tmp_file(apr_file_t **fp, void *callback,
 	return NULL;
 }
 
+static svn_error_t *ra_cancel_check(void *cancel_baton)
+{
+	RemoteAccessObject *ra = cancel_baton;
+	PyGILState_STATE state = PyGILState_Ensure();
+	if (ra->cancel_func != Py_None) {
+		Py_XDECREF(PyObject_CallFunction(ra->cancel_func, NULL));
+	}
+	PyGILState_Release(state);
+	
+	return py_cancel_check(cancel_baton);
+}
+
 static void py_progress_func(apr_off_t progress, apr_off_t total, void *baton, apr_pool_t *pool)
 {
 	PyGILState_STATE state = PyGILState_Ensure();
@@ -565,23 +582,25 @@ static void py_progress_func(apr_off_t progress, apr_off_t total, void *baton, a
 static PyObject *ra_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
 	char *kwnames[] = { "url", "progress_cb", "auth", "config",
-				"client_string_func", "open_tmp_file_func", "uuid", 
+				"client_string_func", "open_tmp_file_func", "uuid",
+				"cancel_func",
 						NULL };
 	char *url = NULL, *uuid = NULL;
 	PyObject *progress_cb = Py_None;
 	AuthObject *auth = (AuthObject *)Py_None;
 	PyObject *config = Py_None;
 	PyObject *client_string_func = Py_None, *open_tmp_file_func = Py_None;
+	PyObject *cancel_func = Py_None;
 	RemoteAccessObject *ret;
 	apr_hash_t *config_hash;
 	svn_ra_callbacks2_t *callbacks2;
 	svn_auth_baton_t *auth_baton;
 	svn_error_t *err;
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|OOOOOz", kwnames, &url, 
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|OOOOOzO", kwnames, &url, 
 									 &progress_cb, (PyObject **)&auth, &config, 
 									 &client_string_func, &open_tmp_file_func, 
-									 &uuid))
+									 &uuid, &cancel_func))
 		return NULL;
 
 	ret = PyObject_New(RemoteAccessObject, &RemoteAccess_Type);
@@ -624,12 +643,14 @@ static PyObject *ra_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
 	ret->client_string_func = client_string_func;
 	ret->open_tmp_file_func = open_tmp_file_func;
+	ret->cancel_func = cancel_func;
 	Py_INCREF(client_string_func);
 	Py_INCREF(open_tmp_file_func);
+	Py_INCREF(cancel_func);
 	callbacks2->progress_func = py_progress_func;
 	callbacks2->auth_baton = auth_baton;
 	callbacks2->open_tmp_file = py_open_tmp_file;
-	callbacks2->cancel_func = py_cancel_check;
+	callbacks2->cancel_func = ra_cancel_check;
 	Py_INCREF(progress_cb);
 	ret->progress_func = progress_cb;
 	callbacks2->progress_baton = (void *)ret;
@@ -1999,6 +2020,7 @@ static void ra_dealloc(PyObject *self)
 	RemoteAccessObject *ra = (RemoteAccessObject *)self;
 	Py_XDECREF(ra->client_string_func);
 	Py_XDECREF(ra->open_tmp_file_func);
+	Py_XDECREF(ra->cancel_func);
 	Py_XDECREF(ra->progress_func);
 	Py_XDECREF(ra->auth);
 	apr_pool_destroy(ra->pool);
