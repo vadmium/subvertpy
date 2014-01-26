@@ -33,5 +33,5 @@ clean::
 	$(SETUP) clean
 	rm -f subvertpy/*.so subvertpy/*.o subvertpy/*.pyc
 
-pydoctor:
+pydoctor: build-inplace
 	$(PYDOCTOR) --introspect-c-modules -c subvertpy.cfg --make-html
