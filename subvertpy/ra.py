@@ -37,9 +37,11 @@ url_handlers = {
 
 def RemoteAccess(url, *args, **kwargs):
     """Connect to a remote Subversion server
+    
+    All arguments are passed to the `_ra.RemoteAccess` constructor.
 
     :param url: URL to connect to
-    :return: RemoteAccess object
+    :return: `_ra.RemoteAccess` object
     """
     (type, opaque) = urllib.splittype(url)
     if not type in url_handlers:

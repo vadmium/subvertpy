@@ -110,7 +110,10 @@ static svn_error_t *py_lock_func (void *baton, const char *path, int do_lock,
 	return NULL;
 }
 
-static const char ra_doc[] = "Connection to a remote Subversion repository.";
+static const char ra_doc[] =
+	"RemoteAccess(url, progress_cb=None, auth=None, config=None, "
+	"client_string_func=None, open_tmp_file_func=None, uuid=None)\n\n"
+	"Connection to a remote Subversion repository.\n";
 typedef struct {
 	PyObject_HEAD
 	svn_ra_session_t *ra;
@@ -2538,7 +2541,7 @@ static PyTypeObject Auth_Type = {
 	/* Flags to define presence of optional/expanded features */
 	0, /*	long tp_flags;	*/
 
-	NULL, /*	const char *tp_doc;  Documentation string */
+	"Auth(providers)", /*	const char *tp_doc;  Documentation string */
 
 	/* Assigned meaning in release 2.0 */
 	/* call function for all accessible objects */
