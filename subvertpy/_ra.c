@@ -110,7 +110,10 @@ static svn_error_t *py_lock_func (void *baton, const char *path, int do_lock,
 	return NULL;
 }
 
-/** Connection to a remote Subversion repository. */
+static const char ra_doc[] =
+	"RemoteAccess(url, progress_cb=None, auth=None, config=None, "
+	"client_string_func=None, open_tmp_file_func=None, uuid=None)\n\n"
+	"Connection to a remote Subversion repository.\n";
 typedef struct {
 	PyObject_HEAD
 	svn_ra_session_t *ra;
@@ -268,10 +271,10 @@ static PyObject *reporter_abort(PyObject *self)
 
 static PyMethodDef reporter_methods[] = {
 	{ "abort", (PyCFunction)reporter_abort, METH_NOARGS, 
-		"S.abort()\n"
+		"S.abort()\n\n"
 		"Abort this report." },
 	{ "finish", (PyCFunction)reporter_finish, METH_NOARGS, 
-		"S.finish()\n"
+		"S.finish()\n\n"
 		"Finish this report." },
 	{ "link_path", (PyCFunction)reporter_link_path, METH_VARARGS, 
 		"S.link_path(path, url, revision, start_empty, lock_token=None)\n" },
@@ -2039,14 +2042,15 @@ static PyMethodDef ra_methods[] = {
 		"S.mergeinfo(paths, revision, inherit, include_descendants)\n" },
 	{ "get_location_segments", ra_get_location_segments, METH_VARARGS, 
 		"S.get_location_segments(path, peg_revision, start_revision, "
-			"end_revision, rcvr)\n"
-		"The receiver is called as rcvr(range_start, range_end, path)\n"
+			"end_revision, rcvr)\n\n"
+		":param rcvr: The receiver, called as rcvr(range_start, "
+			"range_end, path)\n"
 	},
 	{ "has_capability", ra_has_capability, METH_VARARGS, 
-		"S.has_capability(name) -> bool\n"
+		"S.has_capability(name) -> bool\n\n"
 		"Check whether the specified capability is supported by the client and server" },
 	{ "check_path", ra_check_path, METH_VARARGS, 
-		"S.check_path(path, revnum) -> node_kind\n"
+		"S.check_path(path, revnum) -> node_kind\n\n"
 		"Check the type of a path (one of NODE_DIR, NODE_FILE, NODE_UNKNOWN)" },
 	{ "stat", ra_stat, METH_VARARGS,
 		"S.stat(path, revnum) -> dirent\n" },
@@ -2054,29 +2058,30 @@ static PyMethodDef ra_methods[] = {
 		"S.get_lock(path) -> lock\n"
 	},
 	{ "get_dir", (PyCFunction)ra_get_dir, METH_VARARGS|METH_KEYWORDS, 
-		"S.get_dir(path, revision, dirent_fields=-1) -> (dirents, fetched_rev, properties)\n"
+		"S.get_dir(path, revision, dirent_fields=-1) -> (dirents, fetched_rev, properties)\n\n"
 		"Get the contents of a directory. "},
 	{ "get_file", ra_get_file, METH_VARARGS, 
-		"S.get_file(path, stream, revnum=-1) -> (fetched_rev, properties)\n"
+		"S.get_file(path, stream, revnum=-1) -> (fetched_rev, properties)\n\n"
 		"Fetch a file. The contents will be written to stream." },
 	{ "change_rev_prop", ra_change_rev_prop, METH_VARARGS, 
-		"S.change_rev_prop(revnum, name, value)\n"
+		"S.change_rev_prop(revnum, name, value)\n\n"
 		"Change a revision property" },
 	{ "get_commit_editor", (PyCFunction)get_commit_editor, METH_VARARGS|METH_KEYWORDS, 
 		"S.get_commit_editor(revprops, commit_callback, lock_tokens, keep_locks) -> editor\n"
 	},
 	{ "rev_proplist", ra_rev_proplist, METH_VARARGS, 
-		"S.rev_proplist(revnum) -> properties\n"
+		"S.rev_proplist(revnum) -> properties\n\n"
 		"Return a dictionary with the properties set on the specified revision" },
 	{ "replay", ra_replay, METH_VARARGS, 
-		"S.replay(revision, low_water_mark, update_editor, send_deltas=True)\n" 
+		"S.replay(revision, low_water_mark, update_editor, send_deltas=True)\n\n" 
 		"Replay a revision, reporting changes to update_editor." },
 	{ "replay_range", ra_replay_range, METH_VARARGS, 
-		"S.replay_range(start_rev, end_rev, low_water_mark, cbs, send_deltas=True)\n"
-		"Replay a range of revisions, reporting them to an update editor.\n"
-		"cbs is a two-tuple with two callbacks:\n"
-		"- start_rev_cb(revision, revprops) -> editor\n"
-		"- finish_rev_cb(revision, revprops, editor)\n"
+		"S.replay_range(start_rev, end_rev, low_water_mark, cbs, send_deltas=True)\n\n"
+		"Replay a range of revisions, reporting them to an update editor.\n\n"
+		":param cbs: A two-tuple with two callbacks:\n"
+		"    \n"
+		"    - start_rev_cb(revision, revprops) -> editor\n"
+		"    - finish_rev_cb(revision, revprops, editor)\n"
 	},
 	{ "do_switch", ra_do_switch, METH_VARARGS, 
 		"S.do_switch(revision_to_update_to, update_target, recurse, switch_url, update_editor)\n" },
@@ -2086,43 +2091,46 @@ static PyMethodDef ra_methods[] = {
 		"S.do_diff(revision_to_update_to, diff_target, versus_url, diff_editor, recurse, ignore_ancestry, text_deltas) -> Reporter object\n"
 	},
 	{ "get_repos_root", (PyCFunction)ra_get_repos_root, METH_NOARGS, 
-		"S.get_repos_root() -> url\n"
+		"S.get_repos_root() -> url\n\n"
 		"Return the URL to the root of the repository." },
 	{ "get_url", (PyCFunction)ra_get_url, METH_NOARGS,
-		"S.get_url() -> url\n"
+		"S.get_url() -> url\n\n"
 		"Return the URL of the repository." },
 	{ "get_log", (PyCFunction)ra_get_log, METH_VARARGS|METH_KEYWORDS, 
 		"S.get_log(callback, paths, start, end, limit=0, "
 		"discover_changed_paths=False, strict_node_history=True, "
-		"include_merged_revisions=False, revprops=None)\n"
-		"The callback is passed three or four arguments:\n"
-		"callback(changed_paths, revision, revprops[, has_children])\n"
-		"The changed_paths argument may be None, or a dictionary mapping each\n"
-		"path to a tuple:\n"
-		"(action, from_path, from_rev)\n"
+		"include_merged_revisions=False, revprops=None)\n\n"
+		":param callback: Callback, passed three or four arguments:\n"
+		"    \n"
+		"        callback(changed_paths, revision, revprops[, has_children])\n"
+		"    \n"
+		"    The changed_paths argument may be None, or a dictionary mapping\n"
+		"    each path to a tuple:\n"
+		"    \n"
+		"        (action, from_path, from_rev)\n"
 	},
 	{ "iter_log", (PyCFunction)ra_iter_log, METH_VARARGS|METH_KEYWORDS, 
 		"S.iter_log(paths, start, end, limit=0, "
 		"discover_changed_paths=False, strict_node_history=True, "
-		"include_merged_revisions=False, revprops=None)\n"
-		"Yields tuples of three or four elements:\n"
-		"(changed_paths, revision, revprops[, has_children])\n"
+		"include_merged_revisions=False, revprops=None)\n\n"
+		"Yields tuples of three or four elements:\n\n"
+		"    (changed_paths, revision, revprops[, has_children])\n\n"
 		"The changed_paths element may be None, or a dictionary mapping each\n"
-		"path to a tuple:\n"
-		"(action, from_path, from_rev, node_kind)\n"
+		"path to a tuple:\n\n"
+		"    (action, from_path, from_rev, node_kind)\n\n"
 		"This method collects the log entries in another thread. Before calling\n"
 		"any further methods, make sure the thread has completed by running the\n"
 		"iterator to exhaustion (i.e. until StopIteration is raised, the \"for\"\n"
 		"loop finishes, etc).\n"
 	},
 	{ "get_latest_revnum", (PyCFunction)ra_get_latest_revnum, METH_NOARGS, 
-		"S.get_latest_revnum() -> int\n"
+		"S.get_latest_revnum() -> int\n\n"
 		"Return the last revision committed in the repository." },
 	{ "reparent", ra_reparent, METH_VARARGS, 
-		"S.reparent(url)\n"
+		"S.reparent(url)\n\n"
 		"Reparent to a new URL" },
 	{ "get_uuid", (PyCFunction)ra_get_uuid, METH_NOARGS, 
-		"S.get_uuid() -> uuid\n"
+		"S.get_uuid() -> uuid\n\n"
 		"Return the UUID of the repository." },
 	{ NULL, }
 };
@@ -2170,7 +2178,7 @@ static PyTypeObject RemoteAccess_Type = {
 	/* Flags to define presence of optional/expanded features */
 	Py_TPFLAGS_BASETYPE, /*	long tp_flags;	*/
 
-	NULL, /*	const char *tp_doc;  Documentation string */
+	ra_doc, /*	const char *tp_doc;  Documentation string */
 
 	/* Assigned meaning in release 2.0 */
 	/* call function for all accessible objects */
@@ -2482,10 +2490,10 @@ static PyTypeObject CredentialsIter_Type = {
 
 static PyMethodDef auth_methods[] = {
 	{ "set_parameter", auth_set_parameter, METH_VARARGS,
-		"S.set_parameter(key, value)\n"
+		"S.set_parameter(key, value)\n\n"
 		"Set a parameter" },
 	{ "get_parameter", auth_get_parameter, METH_VARARGS,
-		"S.get_parameter(key) -> value\n"
+		"S.get_parameter(key) -> value\n\n"
 		"Get a parameter" },
 	{ "credentials", auth_first_credentials, METH_VARARGS,
 		"Credentials" },
@@ -2535,7 +2543,7 @@ static PyTypeObject Auth_Type = {
 	/* Flags to define presence of optional/expanded features */
 	0, /*	long tp_flags;	*/
 
-	NULL, /*	const char *tp_doc;  Documentation string */
+	"Auth(providers)", /*	const char *tp_doc;  Documentation string */
 
 	/* Assigned meaning in release 2.0 */
 	/* call function for all accessible objects */
@@ -3207,7 +3215,7 @@ static PyObject *get_platform_specific_client_providers(PyObject *self)
 
 static PyMethodDef ra_module_methods[] = {
 	{ "version", (PyCFunction)version, METH_NOARGS,
-		"version() -> (major, minor, micro, tag)\n"
+		"version() -> (major, minor, micro, tag)\n\n"
 		"Version of libsvn_ra currently used." },
 	{ "api_version", (PyCFunction)api_version, METH_NOARGS,
 		"api_version() -> (major, minor, patch, tag)\n\n"
