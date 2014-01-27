@@ -2038,13 +2038,13 @@ static PyObject *ra_status(PyObject *self, PyObject *args)
 static PyMethodDef adm_methods[] = { 
 	{ "prop_set", adm_prop_set, METH_VARARGS, "S.prop_set(name, value, path, skip_checks=False)" },
 	{ "access_path", (PyCFunction)adm_access_path, METH_NOARGS, 
-		"S.access_path() -> path\n"
-		"Returns the base path for this working copy handle." },
+		"S.access_path() -> path\n\n"
+		":return: The base path for this working copy handle." },
 	{ "prop_get", adm_prop_get, METH_VARARGS, "S.prop_get(name, path) -> value" },
 	{ "entries_read", adm_entries_read, METH_VARARGS, "S.entries_read(include_hidden=False) -> dict" },
 	{ "walk_entries", adm_walk_entries, METH_VARARGS, 
-		"S.walk_entries(path, callback, show_hidden=False)\n"
-		"callback should be a function that takes a path and a wc entry" },
+		"S.walk_entries(path, callback, show_hidden=False)\n\n"
+		":param callback: Should be a function that takes a path and a wc entry" },
 	{ "locked", (PyCFunction)adm_locked, METH_NOARGS, 
 		"S.locked() -> bool" },
 	{ "get_prop_diffs", adm_get_prop_diffs, METH_VARARGS, 
@@ -2639,9 +2639,9 @@ static PyObject *match_ignore_list(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef wc_methods[] = {
-	{ "check_wc", check_wc, METH_VARARGS, "check_wc(path) -> version\n"
-		"Check whether path contains a Subversion working copy\n"
-		"return the workdir version"},
+	{ "check_wc", check_wc, METH_VARARGS, "check_wc(path) -> version\n\n"
+		"Check whether path contains a Subversion working copy\n\n"
+		":return: the workdir version"},
 	{ "cleanup", (PyCFunction)cleanup_wc, METH_VARARGS|METH_KEYWORDS, "cleanup(path, diff3_cmd=None)\n" },
 	{ "ensure_adm", (PyCFunction)ensure_adm, METH_KEYWORDS|METH_VARARGS, 
 		"ensure_adm(path, uuid, url, repos=None, rev=None)" },
