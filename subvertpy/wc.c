@@ -1999,11 +1999,11 @@ static PyObject *conflicted(PyObject *self, PyObject *args)
 	return ret;
 }
 
-/**
- * Determine the status of a file in the specified working copy.
- *
- * :return: A status object.
- */
+static const char ra_status_doc[] =
+	"status(wc_path) -> Status\n\n"
+	"Determine the status of a file in the specified working copy.\n"
+	"\n"
+	":return: A status object.\n";
 static PyObject *ra_status(PyObject *self, PyObject *args)
 {
 	char *path;
@@ -2096,7 +2096,7 @@ static PyMethodDef adm_methods[] = {
 		"S.conflicted(path) -> (text_conflicted, prop_conflicted, tree_conflicted)" },
 	{ "resolved_conflict", (PyCFunction)resolved_conflict, METH_VARARGS,
 		"S.resolved_conflict(path, resolve_text, resolve_props, resolve_tree, depth, conflict_choice, notify_func=None, cancel=None)" },
-	{ "status", (PyCFunction)ra_status, METH_VARARGS, "status(wc_path) -> Status" },
+	{ "status", (PyCFunction)ra_status, METH_VARARGS, ra_status_doc },
 	{ NULL, }
 };
 
@@ -2339,12 +2339,12 @@ static PyTypeObject CommittedQueue_Type = {
 	committed_queue_init, /*	newfunc tp_new;	*/
 };
 
-/** 
- * Determine the revision status of a specified working copy.
- *
- * :return: Tuple with minimum and maximum revnums found, whether the 
- * working copy was switched and whether it was modified.
- */
+static const char revision_status_doc[] =
+	"revision_status(wc_path, trail_url=None, committed=False) -> (min_rev, max_rev, switched, modified)\n\n"
+	"Determine the revision status of a specified working copy.\n"
+	"\n"
+	":return: Tuple with minimum and maximum revnums found, whether\n"
+	"    the working copy was switched and whether it was modified.\n";
 static PyObject *revision_status(PyObject *self, PyObject *args, PyObject *kwargs)
 {
 	char *kwnames[] = { "wc_path", "trail_url", "committed",  NULL };
@@ -2661,7 +2661,7 @@ static PyMethodDef wc_methods[] = {
 		"is_entry_prop(name) -> bool" },
 	{ "is_wc_prop", is_wc_prop, METH_VARARGS, 
 		"is_wc_prop(name) -> bool" },
-	{ "revision_status", (PyCFunction)revision_status, METH_KEYWORDS|METH_VARARGS, "revision_status(wc_path, trail_url=None, committed=False) -> (min_rev, max_rev, switched, modified)" },
+	{ "revision_status", (PyCFunction)revision_status, METH_KEYWORDS|METH_VARARGS, revision_status_doc },
 	{ "version", (PyCFunction)version, METH_NOARGS,
 		"version() -> (major, minor, patch, tag)\n\n"
 		"Version of libsvn_wc currently used."
